@@ -14,7 +14,7 @@ def init_imgur_client():
 
 def is_supported_image_url(url):
     image_types = ['jpeg','jpg','png']
-    if url.split('.')[-1] in image_types:
+    if url.split('.')[-1].lower() in image_types:
         return True
     return False
 
@@ -32,6 +32,9 @@ def is_imgur_album_url(url):
             '.' not in url.split('/')[-1] #no extension
     )
 
+
+def is_reddit_image(url):
+    return 'https://i.reddituploads.com' in url
 
 def download_image_from_imgur(url):
     global imgur_client
