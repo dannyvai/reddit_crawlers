@@ -1,3 +1,5 @@
+useDNN = True
+
 #built-in libs
 import urllib
 import requests
@@ -7,15 +9,15 @@ import traceback
 import cv2
 import praw
 #our files
-
-import colorize
+if useDNN:
+    import colorize
 import image_uploader
 import secret_keys
 import image_downloader
 
 subreddit = 'colorize_bw_photos'
-
-colorize.loadDNN(False)
+if useDNN:
+    colorize.loadDNN(False)
 
 def download_image(url,filename="temp.jpg"):
     image_name = ''
@@ -23,11 +25,12 @@ def download_image(url,filename="temp.jpg"):
     if image_downloader.is_supported_image_url(url):
         image_name = image_downloader.get_image_name_from_url(url)
         image_downloader.download_image(url,filename)
+        image_name = filename
 
-    elif image_downloader.is_imgur_url(url,filename):
+    elif image_downloader.is_imgur_url(url):
         image_name = image_downloader.download_image_from_imgur(url)
 
-    return filename
+    return image_name
     
 def check_condition(c):
     text = c.body
@@ -47,11 +50,12 @@ def bot_action(c, verbose=True, respond=False):
         img = cv2.imread(img_path)
         if img is not None:
             print 'Image downloaded and is ok'
-            coloredImage = colorize.runDNN(img_path)
-            #coloredImage = img
+            if useDNN:
+                coloredImage = colorize.runDNN(img_path)
+            else:
+                coloredImage = img
             print 'after DNN'
-            image_name = img_url.split('/')[-1].lstrip().rstrip()
-            print 'Image name is : ', image_name
+            image_name = 'colorized_'+img_path
             cv2.imwrite(image_name,coloredImage)
             print 'Uploading image'
             uploaded_image_link = image_uploader.upload_image(image_name)
