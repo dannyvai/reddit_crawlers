@@ -15,7 +15,7 @@ def upload_image(image_path):
         'title' : 'colorized photo from b&w',
         'description' : 'colorized photo from b&w'
     }
-    res = client.upload_from_path(image_path,config=config,anon=False)
+    res = client.upload_from_path(image_path,config=config,anon=True)
 
     if res is None:
         print 'didn\'t manage to uplaod the file'

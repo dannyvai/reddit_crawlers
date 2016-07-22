@@ -1,22 +1,34 @@
-useDNN = True
 
 #built-in libs
 import urllib
 import requests
 import traceback
+import argparse
 
 #downloaded libs
 import cv2
 import praw
 #our files
-if useDNN:
-    import colorize
+
 import image_uploader
 import secret_keys
 import image_downloader
 
-subreddit = 'colorize_bw_photos'
+parser = argparse.ArgumentParser()
+parser.add_argument("--subreddit", help="which subreddit to use", default="colorize_bw_photos")
+parser.add_argument('--usednn', dest="useDNN", action='store_true')
+parser.add_argument('--no-dnn', dest="useDNN", action='store_false')
+parser.set_defaults(useDNN=True)
+
+args = parser.parse_args()
+
+
+print args
+useDNN = args.useDNN
+subreddit = args.subreddit
+
 if useDNN:
+    import colorize
     colorize.loadDNN(False)
 
 def download_image(url,filename="temp.jpg"):
