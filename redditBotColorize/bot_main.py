@@ -14,6 +14,7 @@ import praw
 import image_uploader
 import secret_keys
 import image_downloader
+import database
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--subreddit", help="which subreddit to use", default="colorize_bw_photos")
@@ -28,6 +29,8 @@ args = parser.parse_args()
 upload_queue = []
 upload_timer = time.time()
 upload_timeout = 60*10 #every 10 minutes to send what wasn't sent
+
+database.load_database()
 
 print args
 useDNN = args.useDNN
@@ -98,15 +101,18 @@ def bot_action(c, verbose=True, respond=False):
 #Main loop the listens to new comments on some subreddit 
 for c in praw.helpers.comment_stream(r, subreddit):
     if check_condition(c):
-        submission = r.get_submission(submission_id=c.permalink)
-        flat_comments = praw.helpers.flatten_tree(submission.comments)
-        already_comments = False
-        for comment in flat_comments:
-            if str(comment.author) == secret_keys.reddit_username:
-                already_comments = True
-                break
-        if not already_comments:
-            bot_action(c)
+        if not database.is_in_db(c.id):
+            submission = r.get_submission(submission_id=c.permalink)
+            flat_comments = praw.helpers.flatten_tree(submission.comments)
+            already_comments = False
+            for comment in flat_comments:
+                if str(comment.author) == secret_keys.reddit_username:
+                    database.add_to_database(c.id)
+                    database.save_database()
+                    already_comments = True
+                    break
+            if not already_comments:
+                bot_action(c)
     if (time.time() - upload_timer)  > upload_timeout :
         upload_timer = time.time()
         print "Trying to send a comment"
