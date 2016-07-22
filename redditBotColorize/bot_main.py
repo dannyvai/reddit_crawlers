@@ -39,7 +39,7 @@ def download_image(url,filename="temp.jpg"):
         image_downloader.download_image(url,filename)
         image_name = filename
 
-    elif image_downloader.is_imgur_url(url):
+    elif image_downloader.is_imgur_image_url(url):
         image_name = image_downloader.download_image_from_imgur(url)
 
     return image_name
