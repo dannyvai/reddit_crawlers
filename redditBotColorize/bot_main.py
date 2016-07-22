@@ -32,6 +32,8 @@ upload_timeout = 60*10 #every 10 minutes to send what wasn't sent
 
 database.load_database()
 
+MAX_IMAGE_WIDTH = 1920
+MAX_IMAGE_HEIGHT = 1080
 print args
 useDNN = args.useDNN
 subreddit = args.subreddit
@@ -70,7 +72,25 @@ def bot_action(c, verbose=True, respond=False):
         print 'img_path is ',img_path
         img = cv2.imread(img_path)
         if img is not None:
-
+            h,w = (img.shape[0],img.shape[1])
+            if h > MAX_IMAGE_HEIGHT or w > MAX_IMAGE_WIDTH:
+                print '-----Resizing image!!------'
+                ratio = float(w)/float(h)
+                if h > MAX_IMAGE_HEIGHT:
+                    factor = float(h)/float(MAX_IMAGE_HEIGHT)
+                else:
+                    factor = float(w)/float(MAX_IMAGE_WIDTH)
+                img = cv2.resize(img,None,fx=1/factor, fy=1/factor, interpolation = cv2.INTER_CUBIC)
+                print '---- after resize image shape is  ----',img.shape
+                cv2.imwrite(img_path,img,[cv2.IMWRITE_JPEG_QUALITY,40])
+            #if h > 1080 or w > 1920:
+            #    try:
+            #        c.reply("Sorry image is too big! we currently only support images as big as 1920x1080")
+            #        database.add_to_database(c.id)
+            #        database.save_database()
+            #    except:
+            #        return
+            #    return
             #1)Run DNN on the b&w image
             print 'Image downloaded and is ok'
             if useDNN:
@@ -92,6 +112,8 @@ def bot_action(c, verbose=True, respond=False):
             if uploaded_image_link is not None:
                 try:
                     res = c.reply('We have colorized your photo! here you go : %s'%uploaded_image_link)
+                    database.add_to_database(c.id)
+                    database.save_database()
                 except:
                     msg = 'We have colorized your photo! here you go : %s'%uploaded_image_link
                     upload_queue.append((c,msg))
