@@ -7,8 +7,20 @@ client_secret = secret_keys.imgur_client_secret
 client = ImgurClient(client_id, client_secret)
 
 def upload_image(image_path):
+    global client
     print 'Uploding image'
-    res = client.upload_from_path(image_path)
-    print 'Your photo is here : ' ,res['link']
-    return res['link']
+    config= { 
+        'album' : None, 
+        'name' : 'colorized photo from b&w', 
+        'title' : 'colorized photo from b&w',
+        'description' : 'colorized photo from b&w'
+    }
+    res = client.upload_from_path(image_path,config=config,anon=False)
+
+    if res is None:
+        print 'didn\'t manage to uplaod the file'
+        return None
+    else:
+        print 'Your photo is here : ' ,res['link']
+        return res['link']
     
