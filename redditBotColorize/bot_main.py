@@ -58,7 +58,7 @@ def download_image(url,filename="temp.jpg"):
 def check_condition(c):
     text = c.body
     tokens = text.split()
-    if "colorize" in tokens:
+    if "colorizebot" in tokens:
         return True
 
 r = praw.Reddit(secret_keys.reddit_bot_user_agent)

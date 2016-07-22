@@ -10,7 +10,7 @@ we use the following python extra packages:
 * skimage
 * scipy
 * numpy
-* ImgurClient - https://github.com/Imgur/imgurpython
+* ImgurClient - https://github.com/Damgaard/PyImgur /  https://github.com/Imgur/imgurpython
 * caffe
 
 colorization caffe model link:
