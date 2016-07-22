@@ -75,7 +75,7 @@ def get_image_name_from_url(url):
 def download_image(url,filename="temp.jpg"):
     try:
         if 'https' in url:
-            r = requests.get(url,verify=False,stream=True)
+            r = requests.get(url,verify=True,stream=True)
             with open(filename,'wb') as image_fid:
                 image_fid.write(r.content)
                 image_fid.close()

@@ -4,6 +4,7 @@ import urllib
 import requests
 import traceback
 import argparse
+import time
 
 #downloaded libs
 import cv2
@@ -18,10 +19,15 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--subreddit", help="which subreddit to use", default="colorize_bw_photos")
 parser.add_argument('--usednn', dest="useDNN", action='store_true')
 parser.add_argument('--no-dnn', dest="useDNN", action='store_false')
-parser.set_defaults(useDNN=True)
+parser.add_argument('--replicate', dest="replicate", action='store_true')
+
+parser.set_defaults(useDNN=True,replicate=False)
 
 args = parser.parse_args()
 
+upload_queue = []
+upload_timer = time.time()
+upload_timeout = 60*10 #every 10 minutes to send what wasn't sent
 
 print args
 useDNN = args.useDNN
@@ -61,6 +67,8 @@ def bot_action(c, verbose=True, respond=False):
         print 'img_path is ',img_path
         img = cv2.imread(img_path)
         if img is not None:
+
+            #1)Run DNN on the b&w image
             print 'Image downloaded and is ok'
             if useDNN:
                 coloredImage = colorize.runDNN(img_path)
@@ -69,20 +77,28 @@ def bot_action(c, verbose=True, respond=False):
             print 'after DNN'
             image_name = 'colorized_'+img_path
             cv2.imwrite(image_name,coloredImage)
+
+            #2)Upload image
             print 'Uploading image'
-            uploaded_image_link = image_uploader.upload_image(image_name)
+            if args.replicate:
+                uploaded_image_link = img_url
+            else:
+                uploaded_image_link = image_uploader.upload_image(image_name)
+
+            #3)Reply to the one who summned the bot
             if uploaded_image_link is not None:
                 try:
                     res = c.reply('We have colorized your photo! here you go : %s'%uploaded_image_link)
                 except:
+                    msg = 'We have colorized your photo! here you go : %s'%uploaded_image_link
+                    upload_queue.append((c,msg))
                     traceback.print_exc()
-                    print res
 
-            
+
+#Main loop the listens to new comments on some subreddit 
 for c in praw.helpers.comment_stream(r, subreddit):
     if check_condition(c):
-        temp = c
-        submission = r.get_submission(submission_id=temp.permalink)
+        submission = r.get_submission(submission_id=c.permalink)
         flat_comments = praw.helpers.flatten_tree(submission.comments)
         already_comments = False
         for comment in flat_comments:
@@ -91,3 +107,12 @@ for c in praw.helpers.comment_stream(r, subreddit):
                 break
         if not already_comments:
             bot_action(c)
+    if (time.time() - upload_timer)  > upload_timeout :
+        upload_timer = time.time()
+        print "Trying to send a comment"
+        try:
+            reddit_comment,msg = upload_queue[0]
+            reddit_comment.reply(msg)
+            upload_queue.pop()
+        except:
+            pass
