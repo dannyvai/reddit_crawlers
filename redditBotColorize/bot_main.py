@@ -1,8 +1,12 @@
-
+#built-in libs
 import urllib
+import requests
+import traceback
+
+#downloaded libs
 import cv2
 import praw
-
+#our files
 import colorize
 import image_uploader
 import secret_keys
@@ -20,9 +24,15 @@ def is_image_url(url):
         return True
     return False
 
-def download_image(url):
-    urllib.urlretrieve(url,"temp.jpg")
-    return "temp.jpg"
+def download_image(url,filename="temp.jpg"):
+    if 'https' in url:
+        r = requests.get(url,verify=False,stream=True)
+        with open(filename,'wb') as image_fid:
+            image_fid.write(r.content)
+            image_fid.close()
+    else:    
+        urllib.urlretrieve(url,filename)
+    return filename
     
     
 def check_condition(c):
@@ -39,9 +49,7 @@ def bot_action(c, verbose=True, respond=False):
     if verbose:
         img_url = c.link_url
         print img_url,is_image_url(img_url)
-        if is_image_url(img_url):   
-            if 'https' in img_url:
-                img_url = img_url.replace('https','http')
+        if is_image_url(img_url):
             img_path = download_image(img_url)
             img = cv2.imread(img_path)
             if img is not None:
@@ -55,8 +63,12 @@ def bot_action(c, verbose=True, respond=False):
                 print 'Uploading image'
                 uploaded_image_link = image_uploader.upload_image(image_name)
                 if uploaded_image_link is not None:
-                    res = c.reply('We have colorized your photo! here you go : %s'%uploaded_image_link)
-                    print res
+                    try:
+                        res = c.reply('We have colorized your photo! here you go : %s'%uploaded_image_link)
+                    except:
+                        traceback.print_exc()
+                        print res
+
             
 for c in praw.helpers.comment_stream(r, subreddit):
     if check_condition(c):

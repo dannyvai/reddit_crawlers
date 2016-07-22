@@ -32,9 +32,8 @@ else:
     submissions = r.get_subreddit(args.subreddit).get_hot(limit=int(args.num))
 
 for x in submissions:
-    score,text = str(x).split("::")
-    score = int(score.rstrip().lstrip())
-    text = text.rstrip().lstrip()
+    score = x.score
+    text = x.selftext
     gather_words(text,score)
 
 sorted_x = sorted(glob_words.items(), key=operator.itemgetter(1))
