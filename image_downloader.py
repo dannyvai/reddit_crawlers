@@ -21,17 +21,18 @@ def is_supported_image_url(url):
 def is_imgur_url(url):
     return ('imgur' in url and '.' not in url.split('/')[-1])
 
-def download_image_from_imgur(url):
+def download_image_from_imgur(url,filename):
     global imgur_client
     if imgur_client is None:
         init_imgur_client()
     image_id = url.split('/')[-1]
     img = imgur_client.get_image(image_id)
     image_url = img.link
+    image_name = get_image_name_from_url(image_url)
     print '=== From IMGUR image_name : %s , image_link : %s'%(image_name,image_url)
     if is_supported_image_url(image_url):
         download_image(image_url,image_name)
-        return image_name
+        return filename
     return None
 
 def get_image_name_from_url(url):
