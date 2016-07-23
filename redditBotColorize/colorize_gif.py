@@ -1,7 +1,7 @@
 import sys
 import cv2
 import colorize
-
+import os
 
 colorize.loadDNN(False)
 
@@ -20,5 +20,5 @@ while True:
     cv2.imwrite(temp_img_path,coloredImage)
     counter += 1
 
-os.system('ffmpeg -i /tmp/%06d.png colorized_%s'%gif_path)
+os.system('ffmpeg -i /tmp/\%06d.jpg colorized_%s'%gif_path)
 
