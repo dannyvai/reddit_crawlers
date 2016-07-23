@@ -5,3 +5,4 @@ TODO:
 *   deal with gifs
 *   if user has cakeday, congratulate him!
 + maximum picture size limit
+*   fix the db to work with multi-processes scenarios
