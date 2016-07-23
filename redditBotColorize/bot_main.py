@@ -115,11 +115,11 @@ def bot_action(c, verbose=True, respond=False):
             #3)Reply to the one who summned the bot
             if uploaded_image_link is not None:
                 try:
-                    res = c.reply('We have colorized your photo! here you go : %s'%uploaded_image_link)
+                    res = c.reply('I am an artificial intelligent bot. This is my attempt to color your image, here you go : %s'%uploaded_image_link)
                     database.add_to_database(c.id)
                     database.save_database()
                 except:
-                    msg = 'We have colorized your photo! here you go : %s'%uploaded_image_link
+                    msg = 'I am an artificial intelligent bot. This is my attempt to color your image, here you go : %s'%uploaded_image_link
                     upload_queue.append((c,msg))
                     traceback.print_exc()
 
