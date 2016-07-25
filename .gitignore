@@ -1,4 +1,5 @@
 *.pyc
 *.jpg
 *.png
+*.gif
 secret_keys.py

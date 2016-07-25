@@ -61,8 +61,8 @@ def download_image(url,filename="temp.jpg"):
     
 def check_condition(c):
     text = c.body
-    tokens = text.split()
-    if "colorizebot" in tokens:
+    tokens = text.lower().split()
+    if len(tokens)  == 1 and (("colorizebot" in tokens) or ('colourizebot' in tokens)):
         return True
 
 r = praw.Reddit(secret_keys.reddit_bot_user_agent)
@@ -114,12 +114,12 @@ def bot_action(c, verbose=True, respond=False):
 
             #3)Reply to the one who summned the bot
             if uploaded_image_link is not None:
+                msg = 'I am an artificial intelligent bot. This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_image_link)
                 try:
-                    res = c.reply('I am an artificial intelligent bot. This is my attempt to color your image, here you go : %s'%uploaded_image_link)
+                    res = c.reply(msg)
                     database.add_to_database(c.id)
                     database.save_database()
                 except:
-                    msg = 'I am an artificial intelligent bot. This is my attempt to color your image, here you go : %s'%uploaded_image_link
                     upload_queue.append((c,msg))
                     traceback.print_exc()
 
