@@ -114,7 +114,7 @@ def bot_action(c, verbose=True, respond=False):
 
             #3)Reply to the one who summned the bot
             if uploaded_image_link is not None:
-                msg = 'I am an artificial intelligent bot. This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_image_link)
+                msg = 'Hi I\'m colorizedbot I was trained to color b&w photos (not comics or rgb photos! please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_image_link)
                 try:
                     res = c.reply(msg)
                     database.add_to_database(c.id)
@@ -124,28 +124,40 @@ def bot_action(c, verbose=True, respond=False):
                     traceback.print_exc()
 
 
-#Main loop the listens to new comments on some subreddit 
-for c in praw.helpers.comment_stream(r, subreddit):
-    if check_condition(c):
-        if not database.is_in_db(c.id):
-            submission = r.get_submission(submission_id=c.permalink)
-            flat_comments = praw.helpers.flatten_tree(submission.comments)
-            already_comments = False
-            for comment in flat_comments:
-                if str(comment.author) == secret_keys.reddit_username:
-                    database.add_to_database(c.id)
-                    database.save_database()
-                    already_comments = True
-                    break
-            if not already_comments:
-                bot_action(c)
-    if (time.time() - upload_timer)  > upload_timeout :
-        upload_timer = time.time()
-        print "Trying to send a comment"
-        try:
-            reddit_comment,msg = upload_queue[0]
-            print reddit_comment.permalink,msg
-            reddit_comment.reply(msg)
-            upload_queue.pop()
-        except:
-            pass
+def run_main_reddit_loop():
+    global praw,database,upload_timer
+    #Main loop the listens to new comments on some subreddit 
+    for c in praw.helpers.comment_stream(r, subreddit):
+        if check_condition(c):
+            if not database.is_in_db(c.id):
+                submission = r.get_submission(submission_id=c.permalink)
+                flat_comments = praw.helpers.flatten_tree(submission.comments)
+                already_commented = False
+                for comment in flat_comments:
+                    if str(comment.author) == secret_keys.reddit_username:
+                        database.add_to_database(c.id)
+                        database.save_database()
+                        already_commented = True
+                        break
+                if not already_commented:
+                    bot_action(c)
+        if (time.time() - upload_timer)  > upload_timeout :
+            upload_timer = time.time()
+            print "Trying to send a comment"
+            try:
+                reddit_comment,msg = upload_queue[0]
+                print reddit_comment.permalink,msg
+                reddit_comment.reply(msg)
+                upload_queue.pop()
+            except:
+                pass
+
+while True:
+    try:
+        run_main_reddit_loop()
+    except:
+        traceback.print_exc()
+        r = praw.Reddit(secret_keys.reddit_bot_user_agent)
+        r.login(username=secret_keys.reddit_username,password=secret_keys.reddit_user_password)
+
+
