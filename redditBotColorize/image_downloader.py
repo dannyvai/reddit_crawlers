@@ -1,16 +1,18 @@
+#Standard imports
 import urllib
 import requests
 import traceback
-
-from imgurpython import ImgurClient
-
+#Downloaded imports
+import pyimgur
+#Our import
 import secret_keys
 
+client_id = secret_keys.imgur_client_id
 imgur_client = None
 
 def init_imgur_client():
     global imgur_client
-    imgur_client = ImgurClient(secret_keys.imgur_client_id, secret_keys.imgur_client_secret)
+    imgur_client = pyimgur.Imgur(client_id)
 
 def is_supported_image_url(url):
     image_types = ['jpeg','jpg','png']
@@ -33,6 +35,25 @@ def is_imgur_album_url(url):
     )
 
 
+def is_imgur_album_with_one_picture(url):
+    global imgur_client
+    print 'Album',url
+    if is_imgur_album_url(url):
+        album_id = url.split('/')[-1]
+
+        try:
+            album =  imgur_client.get_album(album_id)
+        except:
+            album = None
+
+        #TODO:: need to check if only one image
+        #but for now we just use the first image
+        if album is not None and len(album.images) > 0:
+            return True
+        return False
+    return False
+        
+
 def is_reddit_image(url):
     return 'https://i.reddituploads.com' in url
 
@@ -40,7 +61,9 @@ def download_image_from_imgur(url):
     global imgur_client
     if imgur_client is None:
         init_imgur_client()
-    image_id = url.split('/')[-1]
+
+    #image-id could be /image_id?something
+    image_id = url.split('/')[-1].split('?')[0] 
     try:
         img = imgur_client.get_image(image_id)
         image_url = img.link
@@ -49,25 +72,34 @@ def download_image_from_imgur(url):
         if is_supported_image_url(image_url):
             download_image(image_url,image_name)
             return image_name
-    except:
-        album_images = imgur_client.get_album_images(image_id)
-        image_url = album_images[0].link
-        image_name = get_image_name_from_url(image_url)
-        download_image(image_url,image_name)
-        return image_name
-        
-    return None
+    except: 
+        print 'Error getting %s' % image_id
 
+    return ''
+
+#
+#TODO
+#For now this only downloaded the first image in the album
+#Needs to download all of them and create an album accordingly
+#But for that a code refactor should be done
 def download_album_from_imgur(url):
     global imgur_client
     if imgur_client is None:
         init_imgur_client()
     album_id = url.split('/')[-1]
-    album_images = imgur_client.get_album_images(album_id)
-    image_url = album_images[0].link
-    image_name = get_image_name_from_url(image_url)
-    download_image(image_url,image_name)
-    return image_name
+
+    try:
+        album_images = imgur_client.get_album(album_id).images
+    except:
+        album_images = []
+
+    if len(album_images) > 0:
+        image_url = album_images[0].link
+        image_name = get_image_name_from_url(image_url)
+        download_image(image_url,image_name)
+        return image_name
+
+    return ''
 
 def get_image_name_from_url(url):
     if len(url) > 0 and '/' in url:
@@ -75,7 +107,7 @@ def get_image_name_from_url(url):
     return ''
 
 
-def download_image(url,filename="temp.jpg"):
+def download_simple_image(url,filename="temp.jpg"):
     try:
         if 'https' in url:
             r = requests.get(url,verify=True,stream=True)
@@ -87,4 +119,24 @@ def download_image(url,filename="temp.jpg"):
         return filename
     except:
         traceback.print_exc()
-        return None
+        return ''
+
+def download_image(url,filename="temp.jpg"):
+    image_name = ''
+
+    if is_supported_image_url(url):
+        image_name = get_image_name_from_url(url)
+        download_simple_image(url,filename)
+        image_name = filename
+
+    elif is_imgur_image_url(url):
+        image_name = download_image_from_imgur(url)
+
+    elif is_imgur_album_with_one_picture(url):
+        image_name = download_album_from_imgur(url)
+
+    elif is_reddit_image(url):
+        image_name = download_image(url,filename)
+        image_name = filename
+
+    return image_name

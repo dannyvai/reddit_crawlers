@@ -74,6 +74,11 @@ def bot_action(c, verbose=True, respond=False):
         img_url = c.link_url
         img_path = download_image(img_url)
         print 'link is : ', img_url, 'img_path is ',img_path
+
+        #didn't mange to download photo
+        if len(image_path) == 0:
+            continue
+
         img = cv2.imread(img_path)
         if img is not None:
             h,w = (img.shape[0],img.shape[1])
