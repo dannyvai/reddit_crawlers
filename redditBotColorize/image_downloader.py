@@ -143,7 +143,7 @@ def download_image(url,filename="temp.jpg"):
         image_name = download_album_from_imgur(url)
 
     elif is_reddit_image(url):
-        image_name = download_image(url,filename)
+        image_name = download_simple_image(url,filename)
         image_name = filename
 
     return image_name
