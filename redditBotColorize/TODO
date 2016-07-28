@@ -5,7 +5,7 @@ TODO:
 *   if user has cakeday, congratulate him!
 + maximum picture size limit
 *   fix the db to work with multi-processes scenarios
-*   If already colorized image, sent the colorized one
++   If already colorized image, sent the colorized one
 *   Creates statistics page
 +   Private msg colorization
 +   Detect gray photos

@@ -1,6 +1,6 @@
 from PIL import Image, ImageStat
 
-def is_color_image(file, thumb_size=40, MSE_cutoff=100, adjust_color_bias=True):
+def is_color_image(file, thumb_size=40, MSE_cutoff=125, adjust_color_bias=True):
     pil_img = Image.open(file)
     bands = pil_img.getbands()
     if bands == ('R','G','B') or bands== ('R','G','B','A'):
@@ -28,10 +28,3 @@ def is_color_image(file, thumb_size=40, MSE_cutoff=100, adjust_color_bias=True):
     else:
         print "Don't know...", bands
         return False
-
-if __name__ == "__main__":
-    import image_downloader
-    img_url = 'http://imgur.com/n8d3Cjt'
-    file_path = image_downloader.download_image(img_url)
-    detect_color_image(file_path,40,100)
-
