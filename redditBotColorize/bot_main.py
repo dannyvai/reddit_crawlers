@@ -16,6 +16,7 @@ import image_uploader
 import secret_keys
 import image_downloader
 import database
+import image_util
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--subreddit", help="which subreddit to use", default="colorize_bw_photos")
@@ -67,18 +68,22 @@ def colorize_and_upload_from_url(image_url,verbose=True):
 
     verbose_print(['link is : ', image_url, 'img_path is ',img_path],verbose)
 
-    #2) Make some action - Colorize the image
-    colorized_image_path = colorize_image(img_path,verbose)
+    if not image_util.is_color_image(img_path):
 
-    if len(colorized_image_path) == 0:
-        print 'Error colorizing the photo!'
-        return ''
+        #2) Make some action - Colorize the image
+        colorized_image_path = colorize_image(img_path,verbose)
+    
+        if len(colorized_image_path) == 0:
+            print 'Error colorizing the photo!'
+            return ''
 
-    #3) Upload the image
-    uploaded_colorized_image_url = upload_image(colorized_image_path)
-    if len(uploaded_colorized_image_url) == 0:
-        print 'Error uploading the image'
-        return ''
+        #3) Upload the image
+        uploaded_colorized_image_url = upload_image(colorized_image_path)
+        if len(uploaded_colorized_image_url) == 0:
+            print 'Error uploading the image'
+            return ''
+    else: #Color image was given
+        uploaded_colorized_image_url = image_url
 
     return uploaded_colorized_image_url
 

@@ -1,14 +1,13 @@
 TODO:
 *   deal with imgur albums
-*   recognize if the img is bw or colorful already..
-*   get the imgur data like description and more and use it in the upload stage
++   recognize if the img is bw or colorful already..
 *   deal with gifs
 *   if user has cakeday, congratulate him!
 + maximum picture size limit
 *   fix the db to work with multi-processes scenarios
 *   If already colorized image, sent the colorized one
 *   Creates statistics page
-*   Private msg colorization
-*   Detect gray photos
++   Private msg colorization
++   Detect gray photos
 *   Use the imgur description and title. If it's not imgur use reddit thread title
 
