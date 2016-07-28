@@ -2,6 +2,7 @@
 import urllib
 import requests
 import traceback
+import sys
 #Downloaded imports
 import pyimgur
 #Our import
@@ -37,13 +38,19 @@ def is_imgur_album_url(url):
 
 def is_imgur_album_with_one_picture(url):
     global imgur_client
-    print 'Album',url
+
+    if imgur_client is None:
+        init_imgur_client()
+
     if is_imgur_album_url(url):
         album_id = url.split('/')[-1]
+        print 'Album',album_id,url
 
         try:
             album =  imgur_client.get_album(album_id)
         except:
+            print 'Exception getting imgur album images %s'%album_id
+            traceback.print_exc(file=sys.stdout)
             album = None
 
         #TODO:: need to check if only one image

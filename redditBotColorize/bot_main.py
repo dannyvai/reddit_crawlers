@@ -42,23 +42,6 @@ if useDNN:
     import colorize
     colorize.loadDNN(False)
 
-def download_image(url,filename="temp.jpg"):
-    image_name = ''
-
-    if image_downloader.is_supported_image_url(url):
-        image_name = image_downloader.get_image_name_from_url(url)
-        image_downloader.download_image(url,filename)
-        image_name = filename
-
-    elif image_downloader.is_imgur_image_url(url):
-        image_name = image_downloader.download_image_from_imgur(url)
-
-    elif image_downloader.is_reddit_image(url):
-        image_name = image_downloader.download_image(url,filename)
-        image_name = filename
-
-    return image_name
-    
 def check_condition(c):
     text = c.body
     tokens = text.lower().split()
@@ -72,12 +55,12 @@ def bot_action(c, verbose=True, respond=False):
 
     if verbose:
         img_url = c.link_url
-        img_path = download_image(img_url)
+        img_path = image_downloader.download_image(img_url)
         print 'link is : ', img_url, 'img_path is ',img_path
 
         #didn't mange to download photo
-        if len(image_path) == 0:
-            continue
+        if len(img_path) == 0:
+            return
 
         img = cv2.imread(img_path)
         if img is not None:
