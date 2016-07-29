@@ -1,4 +1,5 @@
 from PIL import Image, ImageStat
+import numpy as np
 
 def is_color_image(file, thumb_size=40, MSE_cutoff=125, adjust_color_bias=True):
     try:
@@ -6,6 +7,12 @@ def is_color_image(file, thumb_size=40, MSE_cutoff=125, adjust_color_bias=True):
     except:
         print 'Couldn\'t open file %s'%file
         return False
+
+    np_img = np.array(pil_img)
+    if np.sum(np_img[:,:,1] - np_img[:,:,2]) == 0:
+        print 'Grayscale'
+        return False
+
     bands = pil_img.getbands()
     if bands == ('R','G','B') or bands== ('R','G','B','A'):
         thumb = pil_img.resize((thumb_size,thumb_size))
