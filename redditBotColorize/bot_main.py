@@ -4,7 +4,7 @@ import traceback
 import argparse
 import time
 import re
-
+import numpy as np
 #downloaded libs
 import cv2
 import praw
@@ -81,7 +81,20 @@ def colorize_and_upload_from_url(image_url,verbose=True):
             return ''
     else: #Color image was given
         uploaded_colorized_image_url = 'already_colorized'
+        #2) Make some action - Colorize the image
+        colorized_image_path = colorize_already_colorized_image(img_path)
 
+    #if len(colorized_image_path) == 0:
+    #    print 'Error colorizing the photo!'
+    #    return ''
+
+    #Upload the image
+    #uploaded_colorized_image_url = upload_image(colorized_image_path)
+    #if len(uploaded_colorized_image_url) == 0:
+    #    print 'Error uploading the image'
+    #    return ''
+
+        
     return uploaded_colorized_image_url
 
 def colorize_image(img_path,verbose = True):
@@ -122,6 +135,23 @@ def colorize_image(img_path,verbose = True):
 
     else: #image is None
         return ''
+
+def colorize_already_colorized_image(img_path):
+    img = cv2.imread(img_path)
+
+    bias_r = (np.random.uniform(0,256))
+    bias_g = (np.random.uniform(0,256))
+    bias_b = (np.random.uniform(0,256))
+
+    img[:,:,0] = np.mod( (img[:,:,0] + bias_r),256)
+    img[:,:,1] = np.mod( (img[:,:,1] + bias_g),256)
+    img[:,:,2] = np.mod( (img[:,:,2] + bias_b),256)
+
+    image_name = 'colorized_'+img_path
+    cv2.imwrite(image_name,img)
+
+
+    return image_name
 
 def upload_image(image_path,verbose=True):
     verbose_print('Uploading image',verbose)
@@ -177,7 +207,7 @@ def bot_action(c, verbose=True):
             msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
     else:
         uploaded_colorized_image_url = image_downloader.get_secret_image_url()
-        msg = 'Hi I\'m colorizebot. \n\n IIt seems this photo has been requested to be colorized already. Here\'s something else instead: %s \n\n [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
+        msg = 'Hi I\'m colorizebot. \n\n It seems this photo has been requested to be colorized already. Here\'s something else instead: %s \n\n [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
     try:
         res = c.reply(msg)
         database.add_thread(c.link_id,c.link_url,uploaded_colorized_image_url)

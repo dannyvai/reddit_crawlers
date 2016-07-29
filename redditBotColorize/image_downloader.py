@@ -22,7 +22,7 @@ def init_imgur_client():
 
 def is_supported_image_url(url):
     image_types = ['jpeg','jpg','png']
-    if url.split('.')[-1].lower() in image_types:
+    if url.split('.')[-1].split('?')[0].lower() in image_types:
         return True
     return False
 

@@ -9,8 +9,11 @@ def is_color_image(file, thumb_size=50, MSE_cutoff=140, adjust_color_bias=True):
         return False
 
     np_img = np.array(pil_img)
-    if np.sum(np_img[:,:,1] - np_img[:,:,2]) == 0:
-        print 'Grayscale'
+    if len(np_img.shape) > 2 and np_img.shape[2] > 1:
+        if np.sum(np_img[:,:,1] - np_img[:,:,2]) == 0:
+            print 'Grayscale'
+            return False
+    else:
         return False
 
     bands = pil_img.getbands()
