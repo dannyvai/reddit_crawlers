@@ -12,12 +12,12 @@ import secret_keys
 
 client_id = secret_keys.imgur_client_id
 imgur_client = None
-secert_album = None
+secret_album = None
 
 def init_imgur_client():
-    global imgur_client,secert_album
+    global imgur_client,secret_album
     imgur_client = pyimgur.Imgur(client_id)
-    secert_album = imgur_client.get_album(secret_keys.imgur_secret_album_id)
+    secret_album = imgur_client.get_album(secret_keys.imgur_secret_album_id)
 
 
 def is_supported_image_url(url):
@@ -155,6 +155,7 @@ def download_image(url,filename="temp.jpg"):
 
 def get_secret_image_url():
     global secret_album,imgur_client
+
     if imgur_client is None:
         init_imgur_client()
 
