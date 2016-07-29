@@ -1,7 +1,5 @@
 
 #built-in libs
-import urllib
-import requests
 import traceback
 import argparse
 import time
@@ -130,7 +128,7 @@ def upload_image(image_path,verbose=True):
     verbose_print('Uploading image',verbose)
 
     if args.replicate:
-        uploaded_image_link = img_url
+        uploaded_image_link = image_path
     else:
         try:
             uploaded_image_link = image_uploader.upload_image(image_path)
@@ -162,21 +160,24 @@ def handle_private_msg(msg,verbose=True):
             
 
 def bot_action(c, verbose=True):
-
-    img_url = c.link_url
-    uploaded_colorized_image_url = colorize_and_upload_from_url(img_url)
-
-    if len(uploaded_colorized_image_url) == 0:
-        print 'From bot action :: There was an error while trying to colorize and upload the photo , %s' % img_url
-        return ''
-
-    #Reply to the one who summned the bot
-
-    msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
+    if not database.did_reply_thread(c.link_id):
+        img_url = c.link_url
+        uploaded_colorized_image_url = colorize_and_upload_from_url(img_url)
+    
+        if len(uploaded_colorized_image_url) == 0:
+            print 'From bot action :: There was an error while trying to colorize and upload the photo , %s' % img_url
+            return ''
+    
+        #Reply to the one who summned the bot
+    
+        msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
+    else:
+        image_url = image_downloader.get_secret_image_url()
+        msg = 'Hi I\'m colorizebot. \n\n IIt seems this photo has been requested to be colorized already. Here\'s something else instead: %s \n\n [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(image_url)
     try:
         res = c.reply(msg)
-        database.add_to_database(c.id)
-        database.save_database()
+        database.add_to_database(c.link_id,c.link,uploaded_colorized_image_url)
+
     except:
         upload_queue.append((c,msg))
         traceback.print_exc()
@@ -188,14 +189,13 @@ def run_main_reddit_loop():
     #Main loop the listens to new comments on some subreddit 
     for c in praw.helpers.comment_stream(r, subreddit):
         if check_condition(c):
-            if not database.is_in_db(c.id):
+            if not database.did_reply_comment(c.id):
                 submission = r.get_submission(submission_id=c.permalink)
                 flat_comments = praw.helpers.flatten_tree(submission.comments)
                 already_commented = False
                 for comment in flat_comments:
                     if str(comment.author) == secret_keys.reddit_username:
-                        database.add_to_database(c.id)
-                        database.save_database()
+                        database.add_comment(c.id)
                         already_commented = True
                         break
                 if not already_commented:

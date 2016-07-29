@@ -3,6 +3,8 @@ import urllib
 import requests
 import traceback
 import sys
+import random
+
 #Downloaded imports
 import pyimgur
 #Our import
@@ -10,10 +12,13 @@ import secret_keys
 
 client_id = secret_keys.imgur_client_id
 imgur_client = None
+secert_album = None
 
 def init_imgur_client():
-    global imgur_client
+    global imgur_client,secert_album
     imgur_client = pyimgur.Imgur(client_id)
+    secert_album = imgur_client.get_album(secret_keys.imgur_secret_album_id)
+
 
 def is_supported_image_url(url):
     image_types = ['jpeg','jpg','png']
@@ -147,3 +152,10 @@ def download_image(url,filename="temp.jpg"):
         image_name = filename
 
     return image_name
+
+def get_secret_image_url():
+    global secret_album,imgur_client
+    if imgur_client is None:
+        init_imgur_client()
+
+    return secret_album.images[int(random.uniform(0,len(secret_album.images)))].link

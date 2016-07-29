@@ -1,26 +1,34 @@
-import cPickle as pickle
+import sqlite3
 import secret_keys
 
-db_name =  'db.p'
-
-
-database = None
-
-def load_database():
-    global database,db_name
-    try:
-        database = pickle.load( open(db_name , 'rb') )
-    except:
-        database = []
-
+conn = sqlite3.connect('colorizebot.db')
+cursor = conn.cursor()
 
 def save_database():
-    global database,db_name
-    pickle.dump(database , open(db_name , 'wb'))
+    try:
+        conn.commit()
+    except:
+        conn.rollback
 
-def add_to_database(key):
-    global database
-    database.append(key)
+def add_thread(key,value,value2):
+    cursor.execute('INSERT INTO Links_Replied(Link_ID,Link,colorized_Link) VALUES(?,?,?)',((key,value,value2)))
+    save_database()
 
-def is_in_db(key):
-    return key in database
+def add_comment(comment_id):
+    cursor.execute('INSERT INTO Comments_Replied(comment_id) VALUES(?)',((comment_id)))
+    save_database()
+
+
+def did_reply_comment(comment_id):
+    t = (comment_id,)
+    cursor.execute("SELECT * from Comments_Replied WHERE comment_id like ?", t)
+    rows = cursor.fetchall()
+    return len(rows) > 0
+   
+
+def did_reply_thread(thread_id):
+    t = (thread_id,)
+    cursor.execute("SELECT * from Links_Replied WHERE Link_ID like ?", t)
+    rows = cursor.fetchall()
+    return len(rows) > 0
+    
