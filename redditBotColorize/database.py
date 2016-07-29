@@ -15,7 +15,8 @@ def add_thread(key,value,value2):
     save_database()
 
 def add_comment(comment_id):
-    cursor.execute('INSERT INTO Comments_Replied(comment_id) VALUES(?)',((comment_id)))
+    print comment_id
+    cursor.execute('INSERT INTO Comments_Replied(comment_id) VALUES(?)',(comment_id,))
     save_database()
 
 

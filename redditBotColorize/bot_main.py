@@ -30,7 +30,6 @@ upload_queue = []
 upload_timer = time.time()
 upload_timeout = 60*10 #every 10 minutes to send what wasn't sent
 
-database.load_database()
 
 MAX_IMAGE_WIDTH = 1920
 MAX_IMAGE_HEIGHT = 1080
@@ -140,6 +139,10 @@ def upload_image(image_path,verbose=True):
     return uploaded_image_link
 
 def handle_private_msg(msg,verbose=True):
+
+    if database.did_reply_comment(msg.id):
+        return
+
     urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg.body)
     for url in urls:
         print 'URL from msg: ',url
@@ -153,8 +156,7 @@ def handle_private_msg(msg,verbose=True):
         try:
             res = msg.reply(msg_to_send)
             msg.mark_as_read()
-            database.add_to_database(msg.id)
-            database.save_database()
+            database.add_comment(msg.id)
         except:
             traceback.print_exc()
             
@@ -172,12 +174,12 @@ def bot_action(c, verbose=True):
     
         msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
     else:
-        image_url = image_downloader.get_secret_image_url()
-        msg = 'Hi I\'m colorizebot. \n\n IIt seems this photo has been requested to be colorized already. Here\'s something else instead: %s \n\n [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(image_url)
+        uploaded_colorized_image_url = image_downloader.get_secret_image_url()
+        msg = 'Hi I\'m colorizebot. \n\n IIt seems this photo has been requested to be colorized already. Here\'s something else instead: %s \n\n [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
     try:
         res = c.reply(msg)
-        database.add_to_database(c.link_id,c.link,uploaded_colorized_image_url)
-
+        database.add_thread(c.link_id,c.link_url,uploaded_colorized_image_url)
+        database.add_comment(c.id)
     except:
         upload_queue.append((c,msg))
         traceback.print_exc()
@@ -196,6 +198,7 @@ def run_main_reddit_loop():
                 for comment in flat_comments:
                     if str(comment.author) == secret_keys.reddit_username:
                         database.add_comment(c.id)
+                        database.add_thread(c.link_id,c.link_url,'')
                         already_commented = True
                         break
                 if not already_commented:
