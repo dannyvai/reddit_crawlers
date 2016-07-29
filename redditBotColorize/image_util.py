@@ -1,6 +1,6 @@
 from PIL import Image, ImageStat
 
-def is_color_image(file, thumb_size=40, MSE_cutoff=125, adjust_color_bias=True):
+def is_color_image(file, thumb_size=50, MSE_cutoff=140, adjust_color_bias=True):
     try:
         pil_img = Image.open(file)
     except:

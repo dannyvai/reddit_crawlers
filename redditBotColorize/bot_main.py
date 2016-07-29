@@ -80,7 +80,7 @@ def colorize_and_upload_from_url(image_url,verbose=True):
             print 'Error uploading the image'
             return ''
     else: #Color image was given
-        uploaded_colorized_image_url = image_url
+        uploaded_colorized_image_url = 'already_colorized'
 
     return uploaded_colorized_image_url
 
@@ -148,7 +148,7 @@ def handle_private_msg(msg,verbose=True):
         print 'URL from msg: ',url
         uploaded_colorized_image_url = colorize_and_upload_from_url(url)
 
-        if len(uploaded_colorized_image_url) == 0:
+        if len(uploaded_colorized_image_url) == 0 or 'already_colorized' in uploaded_colorized_image_url:
             msg.mark_as_read()
             print 'From Private msg :: There was an error while trying to colorize and upload the photo , %s',url
             return ''
@@ -159,20 +159,22 @@ def handle_private_msg(msg,verbose=True):
             database.add_comment(msg.id)
         except:
             traceback.print_exc()
-            
+
 
 def bot_action(c, verbose=True):
     if not database.did_reply_thread(c.link_id):
         img_url = c.link_url
         uploaded_colorized_image_url = colorize_and_upload_from_url(img_url)
-    
+
         if len(uploaded_colorized_image_url) == 0:
             print 'From bot action :: There was an error while trying to colorize and upload the photo , %s' % img_url
             return ''
-    
+
         #Reply to the one who summned the bot
-    
-        msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
+        elif 'already_colorized' in uploaded_colorized_image_url:
+            msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n Your photo seems to be already colored, Please try uploading another photo. \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'
+        else:
+            msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
     else:
         uploaded_colorized_image_url = image_downloader.get_secret_image_url()
         msg = 'Hi I\'m colorizebot. \n\n IIt seems this photo has been requested to be colorized already. Here\'s something else instead: %s \n\n [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
