@@ -1,7 +1,11 @@
 from PIL import Image, ImageStat
 
 def is_color_image(file, thumb_size=40, MSE_cutoff=125, adjust_color_bias=True):
-    pil_img = Image.open(file)
+    try:
+        pil_img = Image.open(file)
+    except:
+        print 'Couldn\'t open file %s'%file
+        return False
     bands = pil_img.getbands()
     if bands == ('R','G','B') or bands== ('R','G','B','A'):
         thumb = pil_img.resize((thumb_size,thumb_size))
