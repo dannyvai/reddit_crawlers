@@ -26,6 +26,17 @@ app.get('/status/:id', (req, res) => {
     res.json(queue.query(req.params.id));
 });
 
+app.get('/output/:id', (req, res) => {
+    let operation = queue.query(req.params.id);
+    if (!operation) {
+        res.status(404).send("Could not find image");
+    }
+
+    //new file name is '{filename}.colorized.{extension}'
+    let newFilename = operation.fileName.replace(/\.(.+?$)/,".colorized.$1");
+    res.download(operation.output, newFilename);
+});
+
 app.listen(config.port, () => {
     console.log(`Colorize web server is running on port ${config.port}`);
     queue.start();
