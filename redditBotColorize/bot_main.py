@@ -1,11 +1,10 @@
 
 #built-in libs
-import urllib
-import requests
 import traceback
 import argparse
 import time
-
+import re
+import numpy as np
 #downloaded libs
 import cv2
 import praw
@@ -15,6 +14,7 @@ import image_uploader
 import secret_keys
 import image_downloader
 import database
+import image_util
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--subreddit", help="which subreddit to use", default="colorize_bw_photos")
@@ -30,7 +30,6 @@ upload_queue = []
 upload_timer = time.time()
 upload_timeout = 60*10 #every 10 minutes to send what wasn't sent
 
-database.load_database()
 
 MAX_IMAGE_WIDTH = 1920
 MAX_IMAGE_HEIGHT = 1080
@@ -42,23 +41,6 @@ if useDNN:
     import colorize
     colorize.loadDNN(False)
 
-def download_image(url,filename="temp.jpg"):
-    image_name = ''
-
-    if image_downloader.is_supported_image_url(url):
-        image_name = image_downloader.get_image_name_from_url(url)
-        image_downloader.download_image(url,filename)
-        image_name = filename
-
-    elif image_downloader.is_imgur_image_url(url):
-        image_name = image_downloader.download_image_from_imgur(url)
-
-    elif image_downloader.is_reddit_image(url):
-        image_name = image_downloader.download_image(url,filename)
-        image_name = filename
-
-    return image_name
-    
 def check_condition(c):
     text = c.body
     tokens = text.lower().split()
@@ -68,75 +50,187 @@ def check_condition(c):
 r = praw.Reddit(secret_keys.reddit_bot_user_agent)
 r.login(username=secret_keys.reddit_username,password=secret_keys.reddit_user_password)
 
-def bot_action(c, verbose=True, respond=False):
-
+def verbose_print(msg,verbose = False):
     if verbose:
+        print msg
+
+def colorize_and_upload_from_url(image_url,verbose=True):
+    #1) Download the image
+    img_path = image_downloader.download_image(image_url)
+
+    #didn't mange to download photo
+    if len(img_path) == 0:
+        'Problem downloading %s' % image_url
+        return ''
+
+    verbose_print(['link is : ', image_url, 'img_path is ',img_path],verbose)
+
+    if not image_util.is_color_image(img_path):
+
+        #2) Make some action - Colorize the image
+        colorized_image_path = colorize_image(img_path,verbose)
+    
+        if len(colorized_image_path) == 0:
+            print 'Error colorizing the photo!'
+            return ''
+
+        #3) Upload the image
+        uploaded_colorized_image_url = upload_image(colorized_image_path)
+        if len(uploaded_colorized_image_url) == 0:
+            print 'Error uploading the image'
+            return ''
+    else: #Color image was given
+        uploaded_colorized_image_url = 'already_colorized'
+        #2) Make some action - Colorize the image
+        colorized_image_path = colorize_already_colorized_image(img_path)
+
+    #if len(colorized_image_path) == 0:
+    #    print 'Error colorizing the photo!'
+    #    return ''
+
+    #Upload the image
+    #uploaded_colorized_image_url = upload_image(colorized_image_path)
+    #if len(uploaded_colorized_image_url) == 0:
+    #    print 'Error uploading the image'
+    #    return ''
+
+        
+    return uploaded_colorized_image_url
+
+def colorize_image(img_path,verbose = True):
+
+    img = cv2.imread(img_path)
+    if img is not None:
+        h,w = (img.shape[0],img.shape[1])
+        if h > MAX_IMAGE_HEIGHT or w > MAX_IMAGE_WIDTH:
+            verbose_print('-----Resizing image!!------',verbose)
+            ratio = float(w)/float(h)
+            if h > MAX_IMAGE_HEIGHT:
+                factor = float(h)/float(MAX_IMAGE_HEIGHT)
+            else:
+                factor = float(w)/float(MAX_IMAGE_WIDTH)
+            img = cv2.resize(img,None,fx=1/factor, fy=1/factor, interpolation = cv2.INTER_CUBIC)
+            verbose_print(['---- after resize image shape is  ----',img.shape],verbose)
+            cv2.imwrite(img_path,img,[cv2.IMWRITE_JPEG_QUALITY,40])
+        #if h > 1080 or w > 1920:
+        #    try:
+        #        c.reply("Sorry image is too big! we currently only support images as big as 1920x1080")
+        #        database.add_to_database(c.id)
+        #        database.save_database()
+        #    except:
+        #        return
+        #    return
+        #1)Run DNN on the b&w image
+        verbose_print('Image downloaded and is ok',verbose)
+        if useDNN:
+            coloredImage = colorize.runDNN(img_path)
+        else:
+            coloredImage = img
+        verbose_print('after DNN',verbose)
+        image_name = 'colorized_'+img_path
+        cv2.imwrite(image_name,coloredImage)
+
+
+        return image_name
+
+    else: #image is None
+        return ''
+
+def colorize_already_colorized_image(img_path):
+    img = cv2.imread(img_path)
+
+    bias_r = (np.random.uniform(0,256))
+    bias_g = (np.random.uniform(0,256))
+    bias_b = (np.random.uniform(0,256))
+
+    img[:,:,0] = np.mod( (img[:,:,0] + bias_r),256)
+    img[:,:,1] = np.mod( (img[:,:,1] + bias_g),256)
+    img[:,:,2] = np.mod( (img[:,:,2] + bias_b),256)
+
+    image_name = 'colorized_'+img_path
+    cv2.imwrite(image_name,img)
+
+
+    return image_name
+
+def upload_image(image_path,verbose=True):
+    verbose_print('Uploading image',verbose)
+
+    if args.replicate:
+        uploaded_image_link = image_path
+    else:
+        try:
+            uploaded_image_link = image_uploader.upload_image(image_path)
+        except:
+            print 'Error uploading the image'
+            traceback.print_exc()
+            return ''
+
+    return uploaded_image_link
+
+def handle_private_msg(msg,verbose=True):
+
+    if database.did_reply_comment(msg.id):
+        return
+
+    urls = re.findall('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', msg.body)
+    for url in urls:
+        print 'URL from msg: ',url
+        uploaded_colorized_image_url = colorize_and_upload_from_url(url)
+
+        if len(uploaded_colorized_image_url) == 0 or 'already_colorized' in uploaded_colorized_image_url:
+            msg.mark_as_read()
+            print 'From Private msg :: There was an error while trying to colorize and upload the photo , %s',url
+            return ''
+        msg_to_send = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
+        try:
+            res = msg.reply(msg_to_send)
+            msg.mark_as_read()
+            database.add_comment(msg.id)
+        except:
+            traceback.print_exc()
+
+
+def bot_action(c, verbose=True):
+    if not database.did_reply_thread(c.link_id):
         img_url = c.link_url
-        img_path = download_image(img_url)
-        print 'link is : ', img_url, 'img_path is ',img_path
-        img = cv2.imread(img_path)
-        if img is not None:
-            h,w = (img.shape[0],img.shape[1])
-            if h > MAX_IMAGE_HEIGHT or w > MAX_IMAGE_WIDTH:
-                print '-----Resizing image!!------'
-                ratio = float(w)/float(h)
-                if h > MAX_IMAGE_HEIGHT:
-                    factor = float(h)/float(MAX_IMAGE_HEIGHT)
-                else:
-                    factor = float(w)/float(MAX_IMAGE_WIDTH)
-                img = cv2.resize(img,None,fx=1/factor, fy=1/factor, interpolation = cv2.INTER_CUBIC)
-                print '---- after resize image shape is  ----',img.shape
-                cv2.imwrite(img_path,img,[cv2.IMWRITE_JPEG_QUALITY,40])
-            #if h > 1080 or w > 1920:
-            #    try:
-            #        c.reply("Sorry image is too big! we currently only support images as big as 1920x1080")
-            #        database.add_to_database(c.id)
-            #        database.save_database()
-            #    except:
-            #        return
-            #    return
-            #1)Run DNN on the b&w image
-            print 'Image downloaded and is ok'
-            if useDNN:
-                coloredImage = colorize.runDNN(img_path)
-            else:
-                coloredImage = img
-            print 'after DNN'
-            image_name = 'colorized_'+img_path
-            cv2.imwrite(image_name,coloredImage)
+        uploaded_colorized_image_url = colorize_and_upload_from_url(img_url)
 
-            #2)Upload image
-            print 'Uploading image'
-            if args.replicate:
-                uploaded_image_link = img_url
-            else:
-                uploaded_image_link = image_uploader.upload_image(image_name)
+        if len(uploaded_colorized_image_url) == 0:
+            print 'From bot action :: There was an error while trying to colorize and upload the photo , %s' % img_url
+            return ''
 
-            #3)Reply to the one who summned the bot
-            if uploaded_image_link is not None:
-                msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_image_link)
-                try:
-                    res = c.reply(msg)
-                    database.add_to_database(c.id)
-                    database.save_database()
-                except:
-                    upload_queue.append((c,msg))
-                    traceback.print_exc()
+        #Reply to the one who summned the bot
+        elif 'already_colorized' in uploaded_colorized_image_url:
+            msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n Your photo seems to be already colored, Please try uploading another photo. \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'
+        else:
+            msg = 'Hi I\'m colorizebot. I was trained to color b&w photos (not comics or rgb photos! Please do not abuse me :{}).\n\n This is my attempt to color your image, here you go : %s \n\n This is still a **beta-bot**. If you called the bot and didn\'t get a response, pm us and help us make it better. \n\n  [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
+    else:
+        uploaded_colorized_image_url = image_downloader.get_secret_image_url()
+        msg = 'Hi I\'m colorizebot. \n\n It seems this photo has been requested to be colorized already. Here\'s something else instead: %s \n\n [For full explanation about this bot\'s procedure](http://whatimade.today/our-frst-reddit-bot-coloring-b-2/) | [code](https://github.com/dannyvai/reddit_crawlers/tree/master/redditBotColorize)'%(uploaded_colorized_image_url)
+    try:
+        res = c.reply(msg)
+        database.add_thread(c.link_id,c.link_url,uploaded_colorized_image_url)
+        database.add_comment(c.id)
+    except:
+        upload_queue.append((c,msg))
+        traceback.print_exc()
 
 
 def run_main_reddit_loop():
     global praw,database,upload_timer
+     
     #Main loop the listens to new comments on some subreddit 
     for c in praw.helpers.comment_stream(r, subreddit):
         if check_condition(c):
-            if not database.is_in_db(c.id):
+            if not database.did_reply_comment(c.id):
                 submission = r.get_submission(submission_id=c.permalink)
                 flat_comments = praw.helpers.flatten_tree(submission.comments)
                 already_commented = False
                 for comment in flat_comments:
                     if str(comment.author) == secret_keys.reddit_username:
-                        database.add_to_database(c.id)
-                        database.save_database()
+                        database.add_comment(c.id)
+                        database.add_thread(c.link_id,c.link_url,'')
                         already_commented = True
                         break
                 if not already_commented:
@@ -151,6 +245,10 @@ def run_main_reddit_loop():
                 upload_queue.pop()
             except:
                 pass
+        
+        for msg in r.get_unread(limit=None):
+            if msg.new and len(msg.context) == 0:
+                handle_private_msg(msg)
 
 while True:
     try:
@@ -159,5 +257,6 @@ while True:
         traceback.print_exc()
         r = praw.Reddit(secret_keys.reddit_bot_user_agent)
         r.login(username=secret_keys.reddit_username,password=secret_keys.reddit_user_password)
+
 
 
