@@ -1,0 +1,37 @@
+/******BASE STYLES*******/
+body {
+    background-color: #9aa5a7;
+    color: #363B51;
+}
+
+
+h1 {
+    font-size: 2.625rem;
+    color: #977573;
+    text-transform: uppercase;
+    font-weight: normal;
+    line-height: 1.3;
+    text-shadow: 5px 8px 0 #222;
+    margin: 12px 0 0;
+    text-align: center;
+    color: white;
+}
+
+h3 {
+    font-size: 1.15em;
+}
+
+.container {
+    border: 2px dashed white;
+    height: 300px;
+    background-color: #aebbbd;
+}
+
+/****** lAYOUTS *******/
+
+.wrapper {
+    width: 70%;
+    margin: 0 auto;
+    padding-left: 1em;
+    padding-right:1em;
+}
