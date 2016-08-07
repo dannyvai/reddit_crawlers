@@ -7,7 +7,7 @@ const path = require('path');
 
 const OperationStatus = {
     Queued: "Queued",
-    Running: "Running",
+    Processing: "Processing",
     Finished: "Finished",
     Error: "Error"
 };
@@ -46,7 +46,7 @@ module.exports = class Queue {
         let operation = this.queue.shift();
         operation.startTime = new Date();
         operation.output = path.join(config.outputPath, operation.id);
-        operation.status = OperationStatus.Running;
+        operation.status = OperationStatus.Processing;
         this.runningOperations++;
         console.log("operation started");
         colorize(operation.input, operation.output, (err) =>{

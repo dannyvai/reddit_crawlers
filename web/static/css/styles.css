@@ -1,4 +1,8 @@
 /******BASE STYLES*******/
+* {
+    box-sizing:border-box;
+}
+
 body {
     background-color: #9aa5a7;
     color: #363B51;
@@ -22,9 +26,77 @@ h3 {
 }
 
 .container {
-    border: 2px dashed white;
-    height: 300px;
+    outline: 2px dashed white;
+    height: 200px;
+    width: 200px;
     background-color: #aebbbd;
+    display: inline-block;
+    float:left;
+    margin: 3px;
+}
+
+.photoPreview {
+    outline: 2px solid black;
+    margin: 3px;
+    height: 200px;
+    width: 200px;
+    display: inline-block;
+    float:left;
+    background: no-repeat center center;
+    background-size: cover;
+}
+
+.layer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.50);
+    color: white;
+}
+
+.layer.pending {
+    visibility: hidden;
+    padding-top: 4em;
+    text-align: center;
+}
+
+.photoPreview:hover .layer.pending {
+    visibility: visible;
+}
+
+.layer.uploading {
+    text-align: center;
+    padding-top: 0.5em;
+    font-size: 2em;
+}
+
+.layer.queue {
+
+}
+
+.layer.processing {
+
+}
+
+.removePicture {
+    font-size: 4em;
+    position: absolute;
+    top: 0;
+    right: 0.15em;
+    cursor: pointer;
+}
+
+.uploadSpinner {
+    font-size: 4em;
+    position: relative;
+}
+
+.uploadPercent {
+    font-size: 2rem;
+    position: absolute;
+    top:35%;
+    left:0;
+    width: 100%;
 }
 
 /****** lAYOUTS *******/
