@@ -60,7 +60,7 @@ def colorize_and_upload_from_url(image_url,verbose=True):
 
     #didn't mange to download photo
     if len(img_path) == 0:
-        'Problem downloading %s' % image_url
+        print 'Problem downloading %s' % image_url
         return ''
 
     verbose_print(['link is : ', image_url, 'img_path is ',img_path],verbose)
