@@ -74,10 +74,50 @@
             <h2 class="photoPickerText">Click here to add photos</h2>
         </div>
 
-        <button ng-click="submitPhotos()">submit</button>
+        <div class="buttonDiv">
+            <button class="submitButton" ng-click="submitPhotos()">Submit</button>
+        </div>
 
-        <footer>
-           <p>I'm a footer</p>
+
+        <footer class="footer">
+           <p>Made with ❤️ &nbsp; by <a target="_blank" href="http://whatimade.today"> whatimade.today </a> blog </p>
+            <!-- This is the PayPal donations box, It currently holds the encrypted link to whatimade.today (cause it was copied from this site.
+            -->
+            <div class="paypal">
+                <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+                    <input type="hidden" name="cmd" value="_s-xclick">
+                    <input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+                    ">
+                    <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+                    <img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+                </form>
+            </div>
+            <!--Bitcoin donations, link also needs to be configured-->
+
+            <div class="bitcoin">
+                <script src="//blockr.io/js_external/coinwidget/coin.js"></script>
+                <script>
+                    CoinWidgetCom.go({
+                        wallet_address: '1KjxkSmX9zMj4MReb6DJHCynguLaAJwoGN',
+                        currency: 'bitcoin',
+                        counter: 'count',
+                        lbl_button: 'Donate',
+                        lbl_count: 'donations',
+                        lbl_amount: 'BTC',
+                        lbl_address: 'Help us make whatimade.today better!',
+                        qrcode: true,
+                        alignment: 'bl',
+                        decimals: 8,
+                        size: "big",
+                        color: "light",
+                        countdownFrom: "0",
+                        element: "#coinwidget-bitcoin-1KjxkSmX9zMj4MReb6DJHCynguLaAJwoGN",
+                        onShow: function(){},
+                        onHide: function(){}
+                    });
+                </script>
+                <div id="coinwidget-bitcoin-1KjxkSmX9zMj4MReb6DJHCynguLaAJwoGN"><span data-coinwidget-instance="0" class="COINWIDGETCOM_CONTAINER COINWIDGETCOM_LIGHT COINWIDGETCOM_BIG"><a class="COINWIDGETCOM_BUTTON_BITCOIN" href="#"><img alt="bitcoin | Blockr.io" src="http://blockr.io/js_external/coinwidget/icon_bitcoin.png"><span>Donate</span></a><span>9</span></span></div><br>
+            </div>
         </footer>
     </div>
 
