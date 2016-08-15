@@ -4,23 +4,23 @@
     <meta charset="UTF-8">
     <title>ColorizeBot</title>
     <link rel="stylesheet" href="css/normalize.css">
-    <link href='https://fonts.googleapis.com/css?family=Oxygen:400,700,300' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/css?family=Cabin|Open+Sans" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/media.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body ng-app="Colorize">
-    <div class="wrapper" ng-controller="mainCtrl">
+    <div class="wrapper" ng-controller="mainCtrl" ng-cloak>
         <header>
-            <h1> ColorizeBot</h1>
+            <h1> Colorize Bot</h1>
             <h3> Drop your pictures below, or upload using 'Browse'</h3></h2>
         </header>
 
         <!-- Photos preview -->
-        <div ng-repeat="photo in photos">
+        <div style="display: inline-block;" ng-repeat="photo in photos">
 
             <!-- original photo -->
-            <div class="photoPreview" ng-if="photo.status !== 'Finished'" ngf-background="photo.file" ngf-resize="{height: 200, quality: 0.85}">
+            <div class="photoPreview" ng-if="photo.status !== 'Finished'" ngf-background="photo.file" ngf-resize="{height: 200, quality: 0.95}">
 
                 <!-- Pending upload -->
                 <div class="layer pending" ng-if="photo.status === 'Pending'">
@@ -42,27 +42,36 @@
 
                 <!-- In queue -->
                 <div class="layer queue" ng-if="photo.status === 'Queued'">
-                    <p>Queue position: {{photo.queuePosition}}</p>
+                    <div>
+                        <i class="fa fa-hourglass-half" aria-hidden="true"></i>
+                        Waiting...
+                    </div>
+                    <p class="queuePosition">Position in queue:</p>
+                    <p class="queuePositionNumber">{{photo.queuePosition}}</p>
                 </div>
 
                 <!-- Processing -->
                 <div class="layer processing" ng-if="photo.status === 'Processing'">
-                    <p>Status: {{photo.status}}</p>
+                    <div>Processing</div>
+                    <img src="images/loading-bars.svg" alt="Processing..." height="50%"/>
                 </div>
-
             </div>
 
             <!-- Processed (colorized) photo -->
-            <div class="photoPreview" ng-style="{'background-image':'url(output/'+photo.id+')'}" ng-if="photo.status === 'Finished'">
-                <a href="output/{{photo.id}}" target="_blank">Download</a>
+            <div class="photoPreview colorized" ng-click="downloadPhoto(photo)" ng-style="{'background-image':'url(output/'+photo.id+')'}" ng-if="photo.status === 'Finished'">
+                <!--<a href="output/{{photo.id}}" target="_blank">Download</a>-->
+                <div class="layer finished">
+                    <p class="downloadText">Download</p>
+                </div>
             </div>
         </div>
 
         <!-- Photos picker-->
-        <div class="container" ngf-select="addPhotos($files)" ngf-multiple="true" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="50MB" ngf-fix-orientation="true" ngf-max-files="100" ngf-model-invalid="invalidFiles">
-            <h3>Click here to add photos</h3>
-            <i class="fa fa-plus" aria-hidden="true"></i>
-            <i class="fa fa-picture-o" aria-hidden="true"></i>
+        <div class="photoPicker" ngf-select="addPhotos($files)" ngf-multiple="true" ngf-pattern="'image/*'" ngf-accept="'image/*'" ngf-max-size="50MB" ngf-fix-orientation="true" ngf-max-files="100" ngf-model-invalid="invalidFiles">
+            <div class="photoPickerIcons">
+                <i class="fa fa-picture-o" aria-hidden="true"></i>
+            </div>
+            <h2 class="photoPickerText">Click here to add photos</h2>
         </div>
 
         <button ng-click="submitPhotos()">submit</button>

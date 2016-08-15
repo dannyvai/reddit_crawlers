@@ -27,6 +27,7 @@ angular
                 file: files[i],
                 status: photoStatus.Pending,
                 //uploadProgress: 55,
+                //queuePosition: 62,
                 id: null
             });
         }
@@ -46,6 +47,10 @@ angular
         if(index >= 0) {
             $scope.photos.splice(index, 1);
         }
+    };
+
+    $scope.downloadPhoto = function(photo) {
+        window.open("/output/"+photo.id);
     };
 
 

@@ -6,16 +6,17 @@
 body {
     background-color: #9aa5a7;
     color: #363B51;
+    font-family: 'Open Sans', sans-serif;
 }
 
 
 h1 {
     font-size: 2.625rem;
-    color: #977573;
     text-transform: uppercase;
     font-weight: normal;
     line-height: 1.3;
-    text-shadow: 5px 8px 0 #222;
+    text-shadow: 1px -2px 0 #222;
+    font-family: 'Cabin', sans-serif;
     margin: 12px 0 0;
     text-align: center;
     color: white;
@@ -25,23 +26,35 @@ h3 {
     font-size: 1.15em;
 }
 
-.container {
+.photoPicker {
     outline: 2px dashed white;
     height: 200px;
     width: 200px;
     background-color: #aebbbd;
     display: inline-block;
-    float:left;
     margin: 3px;
+    vertical-align: top;
+    cursor: pointer;
+    text-align: center;
+    padding: 0 5px;
+}
+
+.photoPickerIcons {
+    font-size: 4rem;
+    margin-top: 15px;
+}
+
+.photoPickerText {
+    margin: 0;
 }
 
 .photoPreview {
+    display: inline-block;
     outline: 2px solid black;
     margin: 3px;
     height: 200px;
     width: 200px;
-    display: inline-block;
-    float:left;
+    overflow: hidden;
     background: no-repeat center center;
     background-size: cover;
 }
@@ -60,10 +73,6 @@ h3 {
     text-align: center;
 }
 
-.photoPreview:hover .layer.pending {
-    visibility: visible;
-}
-
 .layer.uploading {
     text-align: center;
     padding-top: 0.5em;
@@ -71,11 +80,15 @@ h3 {
 }
 
 .layer.queue {
-
+    text-align: center;
+    padding-top: 0.5em;
+    font-size: 2em;
 }
 
 .layer.processing {
-
+    text-align: center;
+    padding-top: 0.5em;
+    font-size: 2em;
 }
 
 .removePicture {
@@ -88,15 +101,49 @@ h3 {
 
 .uploadSpinner {
     font-size: 4em;
+    margin-top: -25px;
     position: relative;
 }
 
 .uploadPercent {
     font-size: 2rem;
     position: absolute;
-    top:35%;
+    top:40%;
     left:0;
     width: 100%;
+}
+
+.queuePosition {
+    font-size: 0.6em;
+    margin-top: 1em;
+}
+
+.queuePositionNumber {
+    font-size: 1.5em;
+    margin-top: -0.3em;
+}
+
+.colorized {
+    cursor: pointer;
+}
+
+.layer.finished {
+    visibility: hidden;
+    text-align: center;
+    font-size: 2rem;
+}
+
+.colorized:hover .layer.finished {
+    visibility: visible;
+}
+
+.photoPreview:hover .layer.pending {
+    visibility: visible;
+}
+
+.downloadText {
+    margin: 0;
+    padding-top: 37%;
 }
 
 /****** lAYOUTS *******/
