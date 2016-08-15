@@ -193,13 +193,9 @@ a:hover {
 .footer {
 
     border-top: 1.5px solid rgba(215, 215, 215, 0.99);
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
     padding: 1rem;
     text-align: center;
-    margin: 0 15%;
+    margin: 10% 0 0 0;
 }
 .paypal {
     display: inline-block;
