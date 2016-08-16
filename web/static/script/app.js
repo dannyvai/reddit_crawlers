@@ -25,7 +25,7 @@ angular
         for(var i = 0; i < files.length; i++) {
             $scope.photos.push({
                 file: files[i],
-                status: photoStatus.Pending,
+                status: photoStatus.Processing,
                 //uploadProgress: 55,
                 //queuePosition: 62,
                 id: null

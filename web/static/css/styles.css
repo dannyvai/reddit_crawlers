@@ -4,9 +4,20 @@
 }
 
 body {
-    background-color: #9aa5a7;
-    color: #363B51;
-    font-family: 'Open Sans', sans-serif;
+    /*background-color: #9aa5a7;*/
+    color: #dddddd;
+    font-family: 'Khula', sans-serif;
+    font-weight: 300;
+
+    /*background: linear-gradient(#434750, transparent 90%),*/
+    /*linear-gradient(0deg, #9aa5a7, transparent 70%),*/
+    /*#434750  url('../img/bg.jpg') no-repeat center;*/
+
+    /*background: url('../images/mountain.jpg');*/
+    background-color: #272526;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 
@@ -22,13 +33,14 @@ h1 {
     color: white;
 }
 
-h3 {
+.subTitle {
     font-size: 1.5em;
     margin-bottom: 50px;
+    color: white;
 }
 
 a {
-    color: #363B51;
+    color: #DDDDDD;
     text-decoration: none;
 }
 
@@ -39,16 +51,17 @@ a:hover {
 
 
 .photoPicker {
-    outline: 2px dashed white;
+    outline: 2px dashed #acacac;
     height: 200px;
     width: 200px;
-    background-color: #aebbbd;
+    background-color: #cfcfcf;
     display: inline-block;
     margin: 3px;
     vertical-align: top;
     cursor: pointer;
     text-align: center;
     padding: 0 5px;
+    color: #595959
 }
 
 .photoPickerIcons {
@@ -58,6 +71,8 @@ a:hover {
 
 .photoPickerText {
     margin: 0;
+    line-height: 1.2;
+
 }
 
 .photoPreview {
@@ -120,7 +135,7 @@ a:hover {
 .uploadPercent {
     font-size: 2rem;
     position: absolute;
-    top:40%;
+    top:30%;
     left:0;
     width: 100%;
 }
@@ -166,6 +181,7 @@ a:hover {
     padding-left: 1em;
     padding-right:1em;
     text-align: center;
+    background-color: rgba(255,255,255,0.0);
 }
 
 .submitButton {
@@ -190,9 +206,15 @@ a:hover {
     margin-top: 2em;
 }
 
+hr.style-two {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+}
+
 .footer {
 
-    border-top: 1.5px solid rgba(215, 215, 215, 0.99);
+    /*border-top: 1.5px solid rgba(215, 215, 215, 0.99);*/
     padding: 1rem;
     text-align: center;
     margin: 10% 0 0 0;

@@ -5,15 +5,16 @@
     <title>ColorizeBot</title>
     <link rel="stylesheet" href="css/normalize.css">
     <link href="https://fonts.googleapis.com/css?family=Cabin|Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Khula:300" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/media.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body ng-app="Colorize">
+<body  ng-app="Colorize" ng-cloak>
     <div class="wrapper" ng-controller="mainCtrl" ng-cloak>
         <header>
             <h1> Colorize Bot</h1>
-            <h3> Drop your pictures below, or upload using 'Browse'</h3></h2>
+            <p class="subTitle"> Drop your pictures below, or upload using 'Browse'</p>
         </header>
 
         <!-- Photos preview -->
@@ -80,6 +81,7 @@
 
 
         <footer class="footer">
+            <hr class="style-two"/>
            <p>Made with ❤️ &nbsp; by <a target="_blank" href="http://whatimade.today"> whatimade.today </a> blog </p>
             <!-- This is the PayPal donations box, It currently holds the encrypted link to whatimade.today (cause it was copied from this site.
             -->
