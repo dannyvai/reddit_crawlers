@@ -25,7 +25,7 @@ angular
         for(var i = 0; i < files.length; i++) {
             $scope.photos.push({
                 file: files[i],
-                status: photoStatus.Processing,
+                status: photoStatus.Pending,
                 //uploadProgress: 55,
                 //queuePosition: 62,
                 id: null
@@ -53,6 +53,9 @@ angular
         window.open("/output/"+photo.id);
     };
 
+    $scope.drag = function(isDragging) {
+        console.log(isDragging);
+    };
 
     function uploadSingleFile(photoToUpload) {
         photoToUpload.status = photoStatus.Uploading;

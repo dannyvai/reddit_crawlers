@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <title>ColorizeBot</title>
     <link rel="stylesheet" href="css/normalize.css">
-    <link href="https://fonts.googleapis.com/css?family=Cabin|Open+Sans" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Khula:300" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Cabin|Khula:300" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/media.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body  ng-app="Colorize" ng-cloak>
     <div class="wrapper" ng-controller="mainCtrl" ng-cloak>
+
+        <div ngf-drop="addPhotos($files)" id="dropzone" class="drop-box" ngf-drag-over-class="'dragover'" ngf-multiple="true"
+             ngf-pattern="'image/*'"></div>
+
         <header>
             <h1> Colorize Bot</h1>
-            <p class="subTitle"> Drop your pictures below, or upload using 'Browse'</p>
+            <p class="subTitle"> Drop your pictures here, or click on the button bellow</p>
         </header>
 
         <!-- Photos preview -->
@@ -75,7 +77,7 @@
             <h2 class="photoPickerText">Click here to add photos</h2>
         </div>
 
-        <div class="buttonDiv">
+        <div class="buttonDiv" ng-show="photos.length > 0">
             <button class="submitButton" ng-click="submitPhotos()">Submit</button>
         </div>
 
@@ -126,6 +128,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.0.4/ng-file-upload-all.min.js"></script>
 <script src="script/app.js"></script>
+<script src="script/dragAndDrop.js"></script>
 <link rel="stylesheet" href="fontAwesome/css/font-awesome.min.css">
 </body>
 </html>
