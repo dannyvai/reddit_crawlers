@@ -244,3 +244,10 @@ hr.style-two {
     vertical-align: middle;
 }
 
+/*******************
+MOBILE RELATED STYLES
+********************/
+
+.subTitleMobile {
+    font-size: 1.7em;
+}

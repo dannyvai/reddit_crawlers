@@ -1,0 +1,28 @@
+@media screen  and (max-width: 660px)  {
+
+
+    h1 {
+        font-size: 2.5em;
+    }
+
+
+
+    .wrapper {
+        width: 100%
+    }
+
+.mobile {
+
+}
+
+.nonMobile {
+    display: none;
+}
+    
+}
+
+@media screen and (min-width: 661px) {
+    .mobile {
+        display: none;
+    }
+}
