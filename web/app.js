@@ -31,6 +31,7 @@ app.get('/output/:id', (req, res) => {
     let operation = queue.query(req.params.id);
     if (!operation) {
         res.status(404).send("Could not find image");
+        return;
     }
 
     //new file name is '{filename}.colorized.{extension}'
