@@ -30,7 +30,7 @@ module.exports = class Queue {
     }
 
     queueLoop() {
-        console.log(`queueLoop: running: ${this.runningOperations} max: ${config.maxConcurrentOperations} pending: ${this.queue.length}`);
+        //console.log(`queueLoop: running: ${this.runningOperations} max: ${config.maxConcurrentOperations} pending: ${this.queue.length}`);
 
         //check if we are already processing max allowed photos
         if (this.runningOperations >= config.maxConcurrentOperations) {
