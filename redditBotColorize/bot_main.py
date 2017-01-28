@@ -58,7 +58,7 @@ def colorize_and_upload_from_url(image_url,verbose=True):
     #1) Download the image
     img_path = image_downloader.download_image(image_url)
 
-    #didn't mange to download photo
+    #didn't manage to download photo
     if len(img_path) == 0:
         print 'Problem downloading %s' % image_url
         return ''
